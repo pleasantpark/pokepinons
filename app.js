@@ -1,59 +1,185 @@
 const express = require("express");
+const path = require("path");
+const ejs = require("ejs");
 const app = express();
-const port = process.env.PORT || 3001;
+const bodyParser = require("body-parser")
+const portNumber = process.env.PORT || 3001;
+const env = require("dotenv").config();
+const userName = process.env.MONGO_DB_USERNAME;
+const password = process.env.MONGO_DB_PASSWORD;
+const uri = `mongodb+srv://pokeUser:${password}@cluster0.g5ljk63.mongodb.net/?retryWrites=true&w=majority`;
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const { readSync } = require("fs");
+app.use(express.static(__dirname + '/templates'));
 
-app.get("/", (req, res) => res.type('html').send(html));
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+const databaseAndCollection = {db: process.env.MONGO_DB_NAME, collection: process.env.MONGO_COLLECTION};
+const client = new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
+
+  async function searchOpinion(client, databaseAndCollection, pokemon, res) {
+    try {
+      await client.connect();
+      await client.db("admin").command({ ping: 1 });
+
+      let filter = {pokemon : {$eq : pokemon.toLowerCase()}};
+      const result = await client.db(databaseAndCollection.db)
+                           .collection(databaseAndCollection.collection)
+                           .findOne(filter);
+
+      let selected = "";
+      for (let i = 0; i < result.info.length; i++){
+        selected += `<tr><td>${result.rating[i]}</td><td>${result.info[i]}</td></tr>`;
+      }
+     
+      return selected;
+      
+ 
+    } catch(e) {
+        console.error(e);
+    } finally {
+      // Ensures that the client will close when you finish/error
+      await client.close();
+    }
+  }
+
+async function insertOpinion(client, databaseAndCollection, submission, res) {
+  try {
+    await client.connect();
+    await client.db("admin").command({ ping: 1 });
+
+    let result = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).updateOne(
+      {pokemon: submission.pokemon.toLowerCase()}, {$push: {info: submission.info, rating: submission.rating}}, {upsert:true});
+    res.render("index", {pokemon: ""});
+  }catch(e){
+      console.error(e);
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
+
+async function clearOpinion(client, databaseAndCollection, res) {
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    // Send a ping to confirm a successful connection
+    await client.db("admin").command({ ping: 1 });
+    //console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    const result = await client.db(databaseAndCollection.db)
+    .collection(databaseAndCollection.collection)
+    .deleteMany({});
+    res.render("index", {pokemon: ""});
+  }catch(e){
+      console.error(e);
+  } finally {
+    // Ensures that the client will close when you finish/error
+    await client.close();
+  }
+}
 
 
-const html = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello from Render!</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <script>
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          disableForReducedMotion: true
-        });
-      }, 500);
-    </script>
-    <style>
-      @import url("https://p.typekit.net/p.css?s=1&k=vnd5zic&ht=tk&f=39475.39476.39477.39478.39479.39480.39481.39482&a=18673890&app=typekit&e=css");
-      @font-face {
-        font-family: "neo-sans";
-        src: url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/l?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff2"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/d?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("woff"), url("https://use.typekit.net/af/00ac0a/00000000000000003b9b2033/27/a?primer=7cdcb44be4a7db8877ffa5c0007b8dd865b3bbc383831fe2ea177f62257a9191&fvd=n7&v=3") format("opentype");
-        font-style: normal;
-        font-weight: 700;
-      }
-      html {
-        font-family: neo-sans;
-        font-weight: 700;
-        font-size: calc(62rem / 16);
-      }
-      body {
-        background: white;
-      }
-      section {
-        border-radius: 1em;
-        padding: 1em;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        margin-right: -50%;
-        transform: translate(-50%, -50%);
-      }
-    </style>
-  </head>
-  <body>
-    <section>
-      Hello from Render!
-    </section>
-  </body>
-</html>
-`
+//define page handling
+app.set("views", path.resolve(__dirname, "templates"));
+app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({extended:false}));
+
+app.get("/", (req, res) => res.render("index", {pokemon: ""}));
+
+app.post("/input", async (req,res)=>{
+  let pokemon = req.body.pokemon;
+  const pokeJSON = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.toLowerCase()}`);
+  if (pokeJSON.ok){
+    const pokeData = await pokeJSON.json();
+    let types = "";
+    let name = (pokeData.name.charAt(0).toUpperCase() + pokeData.name.slice(1));
+  
+    pokeData.types.forEach(t => {
+      types += `${t.type.name} `
+    })
+  
+    const variables = {
+      pokeImage: pokeData.sprites.front_default,
+      name: name, 
+      pokemon: name,
+      height: pokeData.height/10,
+      weight: pokeData.weight/10,
+      type: types
+    }
+    res.render("input", variables);
+  } else {
+    res.render("invalid");
+  }
+});
+
+app.post("/opinions", async (req,res)=>{
+  let pokemon = req.body.pokemon;
+  const pokeJSON = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon.toLowerCase()}`);
+  
+  if (pokeJSON.ok){
+    const pokeData = await pokeJSON.json();
+    let types = "";
+    let name = (pokeData.name.charAt(0).toUpperCase() + pokeData.name.slice(1));
+  
+    pokeData.types.forEach(t => {
+      types += `${t.type.name} `
+    })
+
+    let selected = await searchOpinion(client,databaseAndCollection,pokemon, res).catch(console.error);
+  
+    const variables = {
+      pokeImage: pokeData.sprites.front_default,
+      name: name, 
+      pokemon: name,
+      height: pokeData.height/10,
+      weight: pokeData.weight/10,
+      type: types,
+      opinions: selected
+    }
+    res.render("opinions", variables);
+  } else {
+    res.render("invalid");
+  }
+ 
+});
+
+app.post("/submitted", (req,res)=>{
+  let pokemon = req.body.pokemonName; 
+  let rating = req.body.rating;
+  let info = req.body.info;
+  let submission = {pokemon, rating, info};
+  insertOpinion(client,databaseAndCollection,submission,res).catch(console.error);
+});
+
+app.post("/clear", (req,res)=>{
+  clearOpinion(client,databaseAndCollection,res).catch(console.error);
+});
+
+app.listen(portNumber, () => console.log(`running at http://localhost:${portNumber}`));
+
+
+async function makeTable(pokeJSON){
+  const pokeData = await pokeJSON.json();
+  let types = "";
+  let name = (pokeData.name.charAt(0).toUpperCase() + pokeData.name.slice(1));
+
+  pokeData.types.forEach(t => {
+    types += `${t.type.name} `
+  })
+
+  const variables = {
+    pokeImage: pokeData.sprites.front_default,
+    name: name, 
+    pokemon: name,
+    height: pokeData.height/10,
+    weight: pokeData.weight/10,
+    type: types
+  }
+
+  return variables;
+}
