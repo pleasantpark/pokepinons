@@ -1,15 +1,13 @@
-# README
+PokePinion Group Project
 
-This is the [Express](https://expressjs.com) [Hello world](https://expressjs.com/en/starter/hello-world.html) example on [Render](https://render.com).
+Ali Aboelata (aaboelat)
+Parker Seaman (pwseaman)
+Jenny Chang (jchang38)
 
-The app in this repo is deployed at [https://express.onrender.com](https://express.onrender.com).
+A super fun super cute way to submit and view opinions on your favorite and least favorite pokemon. 
 
-## Deployment
+API Link: 
+pokeapi.co
 
-See https://render.com/docs/deploy-node-express-app or follow the steps below:
-
-Create a new web service with the following values:
-  * Build Command: `yarn`
-  * Start Command: `node app.js`
-
-That's it! Your web service will be live on your Render URL as soon as the build finishes.
+YouTube Link Demo: 
+https://youtu.be/M09SsHtX3OU
