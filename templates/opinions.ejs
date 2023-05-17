@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+
+
+<head>
+    <meta charset="utf-8" />
+    <title>PokePinion</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="pokeball.png" type="image/png">
+</head>
+
+
+<body>
+    <h1>Displaying Opinions on <%- pokemon %></h1>
+
+    <div class="container"> 
+    <img src=<%- pokeImage %>>
+
+    <div class="table-div">
+    <table border='1'>
+        <th colspan="2"><%- name %></th>
+        <tr>
+            <td>Height (m): </td>
+            <td><%- height %></td>
+        </tr>
+        <tr>
+            <td>Weight (kg): </td>
+            <td><%- weight %></td>
+        </tr>
+        <tr>
+            <td>Type: </td>
+            <td><%- type %></td>
+        </tr>
+    </table><br><br>
+    </div>
+    </div>
+
+    <table id="opinionsTable" border='1'>
+        <tr>
+            <th>Ratings: </th>
+            <th>Opinions: </th>
+        </tr>
+        <%- opinions %>
+    </table><br><br>
+
+    <a href="/">Go home</a>
+
+</body>
+
+
+</html>

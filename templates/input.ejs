@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+
+
+<head>
+    <meta charset="utf-8" />
+    <title>PokePinion</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="pokeball.png" type="image/png">
+</head>
+
+
+<body>
+    <h1>Submitting Opinion on <%- pokemon %></h1>
+
+    <div class="container"> 
+    <img src=<%- pokeImage %>>
+
+    <div class="table-div">
+    <table>
+        <th colspan="2"><%- name %></th>
+        <tr>
+            <td>Height (m): </td>
+            <td><%- height %></td>
+        </tr>
+        <tr>
+            <td>Weight (kg): </td>
+            <td><%- weight %></td>
+        </tr>
+        <tr>
+            <td>Type: </td>
+            <td><%- type %></td>
+        </tr>
+    </table>
+    </div>
+    </div>
+    
+    <br><br>
+
+
+    <fieldset>
+    <form method="post">
+        <input type="hidden" name="pokemonName" value=<%- name %>>
+        Rating out of 10:
+        <input type="number" min="0" max="10" name="rating"><br><br>
+        <textarea rows="10" cols="65" name="info"></textarea><br><br>
+        <input type="submit" class="button" formaction="/submitted" value="Submit my opinion!">
+    </form>
+    </fieldset>
+
+
+</body>
+
+
+</html>

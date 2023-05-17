@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+
+
+<head>
+    <meta charset="utf-8" />
+    <title>PokePinion</title>
+    <script src="../app.js"></script>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="pokeball.png" type="image/png">
+</head>
+
+
+<body>
+    <h1>Welcome to PokePinion!</h1>
+
+    <h2>Search for a Pokemon here: </h2>
+    <form method="post">
+        <input type="text" id="" placeholder="Pokemon name" name="pokemon" required><br><br><hr width="500px"><br>
+        <input type="submit" formaction="/input" class="button" value="Review this Pokemon!">
+        <input type="submit" class="button" formaction="/opinions" value="View opinions on this Pokemon!">
+        <br><br>
+        
+    </form>
+    <form method = "post" onsubmit = "return window.confirm('Are you sure you want to clear the database?')">
+        <input type="submit" class="button" formaction="/clear" value="Clear Database">
+    </form>
+
+
+</body>
+
+
+</html>
