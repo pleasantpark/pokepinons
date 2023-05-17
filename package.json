@@ -1,7 +1,7 @@
 {
   "name": "express-hello-world",
   "version": "1.0.0",
-  "description": "Express Hello World on Render",
+  "description": "Fun way to share pokemon opinions",
   "main": "app.js",
   "repository": "https://github.com/render-examples/express-hello-world",
   "author": "Render Developers",
@@ -11,7 +11,12 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.0.3",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "mongodb": "^5.4.0",
+    "path": "^0.12.7"
   },
   "engines": {
     "node": ">=14"
